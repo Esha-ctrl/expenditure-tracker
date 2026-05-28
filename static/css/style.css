@@ -19,6 +19,14 @@
     --border: #e4e1da;
     --border-soft: #eeebe4;
 
+    --cat-food: #1a472a;            --cat-food-bg: #e8f0eb;
+    --cat-transport: #2f5475;       --cat-transport-bg: #e6edf5;
+    --cat-bills: #a23a2c;           --cat-bills-bg: #fbe8e4;
+    --cat-health: #1d6e6a;          --cat-health-bg: #e2f1ef;
+    --cat-entertainment: #6b4a7a;   --cat-entertainment-bg: #efe7f3;
+    --cat-shopping: #c17f24;        --cat-shopping-bg: #fdf3e3;
+    --cat-other: #6b6b6b;           --cat-other-bg: #efece6;
+
     --font-display: 'DM Serif Display', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
 
@@ -112,6 +120,12 @@ a { color: inherit; text-decoration: none; }
 }
 
 .nav-cta:hover { background: var(--accent) !important; }
+
+.nav-user {
+    color: var(--ink-soft);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
 
 /* ------------------------------------------------------------------ */
 /* Main                                                                */
