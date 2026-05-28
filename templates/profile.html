@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — Spendly{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="profile-inner">
+
+        {# 1. User info card #}
+        <div class="profile-card user-card">
+            <div class="user-avatar">{{ user.initials }}</div>
+            <div class="user-meta">
+                <h1 class="user-name">{{ user.name }}</h1>
+                <p class="user-email">{{ user.email }}</p>
+                <p class="user-since">Member since {{ user.member_since }}</p>
+            </div>
+        </div>
+
+        {# 2. Summary stats row #}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total spent</span>
+                <span class="stat-value">{{ stats.currency_symbol }}{{ stats.total_spent }}</span>
+                <span class="stat-hint">All time</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Transactions</span>
+                <span class="stat-value">{{ stats.transaction_count }}</span>
+                <span class="stat-hint">Recorded so far</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Top category</span>
+                <span class="stat-value">{{ stats.top_category }}</span>
+                <span class="stat-hint">Highest share of spend</span>
+            </div>
+        </div>
+
+        {# 3. Transaction history #}
+        <section class="profile-block">
+            <h2 class="block-title">Recent transactions</h2>
+            <div class="table-wrap">
+                <table class="txn-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th class="txn-amount">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in expenses %}
+                        <tr>
+                            <td>{{ e.date }}</td>
+                            <td>{{ e.description }}</td>
+                            <td>
+                                <span class="category-badge" data-category="{{ e.category | lower }}">{{ e.category }}</span>
+                            </td>
+                            <td class="txn-amount">{{ stats.currency_symbol }}{{ e.amount }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {# 4. Category breakdown #}
+        <section class="profile-block">
+            <h2 class="block-title">Where your money went</h2>
+            <div class="breakdown-list">
+                {% for c in categories %}
+                <div class="breakdown-row">
+                    <span class="breakdown-label">{{ c.name }}</span>
+                    <span class="breakdown-track">
+                        <span class="breakdown-bar bar-w-{{ c.percent_bucket }}"></span>
+                    </span>
+                    <span class="breakdown-total">{{ stats.currency_symbol }}{{ c.total }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+</section>
+{% endblock %}
