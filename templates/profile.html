@@ -18,14 +18,56 @@
                 <p class="user-email">{{ user.email }}</p>
                 <p class="user-since">Member since {{ user.member_since }}</p>
             </div>
+            <form method="POST" action="{{ url_for('update_currency') }}" class="currency-form">
+                <label class="currency-label" for="currency-select">Currency</label>
+                <select id="currency-select" name="currency" class="currency-select">
+                    {% for code, symbol in currencies.items() %}
+                    <option value="{{ code }}" {% if code == currency_code %}selected{% endif %}>
+                        {{ symbol }} {{ code }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
 
-        {# 2. Summary stats row #}
+        {# 2. Date filter bar #}
+        {% if error %}
+        <div class="filter-error">{{ error }}</div>
+        {% endif %}
+
+        <div class="profile-card filter-bar">
+            <div class="filter-presets">
+                <a href="{{ url_for('profile') }}"
+                   class="preset-btn{% if active_preset == 'all' %} preset-active{% endif %}">All Time</a>
+                <a href="{{ url_for('profile', date_from=this_month_from, date_to=date_today) }}"
+                   class="preset-btn{% if active_preset == 'this_month' %} preset-active{% endif %}">This Month</a>
+                <a href="{{ url_for('profile', date_from=three_mo_from, date_to=date_today) }}"
+                   class="preset-btn{% if active_preset == '3mo' %} preset-active{% endif %}">Last 3 Months</a>
+                <a href="{{ url_for('profile', date_from=six_mo_from, date_to=date_today) }}"
+                   class="preset-btn{% if active_preset == '6mo' %} preset-active{% endif %}">Last 6 Months</a>
+            </div>
+            <form method="GET" action="{{ url_for('profile') }}" class="filter-form">
+                <input type="date" name="date_from" value="{{ date_from or '' }}">
+                <span class="filter-sep">to</span>
+                <input type="date" name="date_to" value="{{ date_to or '' }}">
+                <button type="submit" class="filter-apply">Apply</button>
+            </form>
+        </div>
+
+        {% if filter_active %}
+        <p class="filter-active-label">
+            Showing results
+            {% if date_from %}from <strong>{{ date_from }}</strong>{% endif %}
+            {% if date_to %}to <strong>{{ date_to }}</strong>{% endif %}
+        </p>
+        {% endif %}
+
+        {# 3. Summary stats row #}
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">Total spent</span>
                 <span class="stat-value">{{ stats.currency_symbol }}{{ stats.total_spent }}</span>
-                <span class="stat-hint">All time</span>
+                <span class="stat-hint">{% if filter_active %}Filtered period{% else %}All time{% endif %}</span>
             </div>
             <div class="stat-card">
                 <span class="stat-label">Transactions</span>
@@ -39,50 +81,51 @@
             </div>
         </div>
 
-        {# 3. Transaction history #}
-        <section class="profile-block">
-            <h2 class="block-title">Recent transactions</h2>
-            <div class="table-wrap">
-                <table class="txn-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th class="txn-amount">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for e in expenses %}
-                        <tr>
-                            <td>{{ e.date }}</td>
-                            <td>{{ e.description }}</td>
-                            <td>
-                                <span class="category-badge" data-category="{{ e.category | lower }}">{{ e.category }}</span>
-                            </td>
-                            <td class="txn-amount">{{ stats.currency_symbol }}{{ e.amount }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        {# 4. Category breakdown #}
-        <section class="profile-block">
-            <h2 class="block-title">Where your money went</h2>
-            <div class="breakdown-list">
-                {% for c in categories %}
-                <div class="breakdown-row">
-                    <span class="breakdown-label">{{ c.name }}</span>
-                    <span class="breakdown-track">
-                        <span class="breakdown-bar bar-w-{{ c.percent_bucket }}"></span>
-                    </span>
-                    <span class="breakdown-total">{{ stats.currency_symbol }}{{ c.total }}</span>
+        {# 4 + 5. Transaction history and category breakdown — side by side #}
+        <div class="profile-panels">
+            <section class="profile-block">
+                <h2 class="block-title">Recent transactions</h2>
+                <div class="table-wrap">
+                    <table class="txn-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Category</th>
+                                <th class="txn-amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in expenses %}
+                            <tr>
+                                <td>{{ e.date }}</td>
+                                <td>{{ e.description }}</td>
+                                <td>
+                                    <span class="category-badge" data-category="{{ e.category | lower }}">{{ e.category }}</span>
+                                </td>
+                                <td class="txn-amount">{{ stats.currency_symbol }}{{ e.amount }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                {% endfor %}
-            </div>
-        </section>
+            </section>
+
+            <section class="profile-block">
+                <h2 class="block-title">Where your money went</h2>
+                <div class="breakdown-list">
+                    {% for c in categories %}
+                    <div class="breakdown-row">
+                        <span class="breakdown-label">{{ c.name }}</span>
+                        <span class="breakdown-track">
+                            <span class="breakdown-bar bar-w-{{ c.percent_bucket }}"></span>
+                        </span>
+                        <span class="breakdown-total">{{ stats.currency_symbol }}{{ c.total }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
 
     </div>
 </section>
