@@ -19,11 +19,12 @@ def init_db():
         conn.executescript(
             """
             CREATE TABLE IF NOT EXISTS users (
-                id            INTEGER PRIMARY KEY AUTOINCREMENT,
-                name          TEXT    NOT NULL,
-                email         TEXT    UNIQUE NOT NULL,
-                password_hash TEXT    NOT NULL,
-                created_at    TEXT    DEFAULT (datetime('now'))
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                name               TEXT    NOT NULL,
+                email              TEXT    UNIQUE NOT NULL,
+                password_hash      TEXT    NOT NULL,
+                preferred_currency TEXT    DEFAULT 'INR',
+                created_at         TEXT    DEFAULT (datetime('now'))
             );
 
             CREATE TABLE IF NOT EXISTS expenses (
@@ -37,6 +38,23 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
             """
+        )
+        conn.commit()
+        # Migrate existing databases that predate this column
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()]
+        if "preferred_currency" not in cols:
+            conn.execute("ALTER TABLE users ADD COLUMN preferred_currency TEXT DEFAULT 'INR'")
+            conn.commit()
+    finally:
+        conn.close()
+
+
+def set_user_currency(user_id, currency_code):
+    conn = get_db()
+    try:
+        conn.execute(
+            "UPDATE users SET preferred_currency = ? WHERE id = ?",
+            (currency_code, user_id),
         )
         conn.commit()
     finally:
